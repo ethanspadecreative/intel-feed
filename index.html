@@ -178,8 +178,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div style="display:flex;align-items:center;gap:10px">
     <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:600;color:var(--amber)" id="day-pct">—%</div>
     <div style="flex:1;height:8px;background:var(--surf2);border-radius:4px;overflow:hidden;position:relative">
-      <div id="day-bar" style="position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),rgba(255,170,0,0.4));border-radius:4px;transition:width 1s ease;width:50%"></div>
-      <div id="night-bar" style="position:absolute;right:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(136,85,255,0.4),var(--violet));border-radius:4px;transition:width 1s ease;width:50%"></div>
+      <div id="day-bar" style="position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),rgba(255,170,0,0.5));border-radius:0;transition:width 1s ease;width:50%"></div>
+      <div id="night-bar" style="position:absolute;right:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(136,85,255,0.5),var(--violet));border-radius:0;transition:width 1s ease;width:50%"></div>
     </div>
     <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:600;color:var(--violet)" id="night-pct">—%</div>
   </div>
@@ -242,7 +242,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
       <span style="display:inline-block;width:10px;height:1px;background:#00ff88;opacity:0.6"></span>BIRTHS
     </div>
-    <div id="births-counter" style="font-family:'Orbitron',monospace;font-size:clamp(20px,5vw,32px);font-weight:800;color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,0.3);line-height:1">0</div>
+    <div id="births-counter" style="font-family:'Share Tech Mono',monospace;font-size:clamp(22px,5vw,34px);font-weight:400;color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,0.3);line-height:1;letter-spacing:.05em">0</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:6px;letter-spacing:.08em;line-height:1.6">4.3 / SEC<br>SINCE OPEN</div>
     <div style="height:2px;background:var(--b1);border-radius:1px;margin-top:10px;overflow:hidden">
       <div style="height:100%;background:linear-gradient(90deg,#00ff88,rgba(0,255,136,0.3));animation:hbpulse 1.4s ease-in-out infinite"></div>
@@ -255,7 +255,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
       <span style="display:inline-block;width:10px;height:1px;background:var(--red);opacity:0.6"></span>DEATHS
     </div>
-    <div id="deaths-counter" style="font-family:'Orbitron',monospace;font-size:clamp(20px,5vw,32px);font-weight:800;color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.3);line-height:1">0</div>
+    <div id="deaths-counter" style="font-family:'Share Tech Mono',monospace;font-size:clamp(22px,5vw,34px);font-weight:400;color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.3);line-height:1;letter-spacing:.05em">0</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:6px;letter-spacing:.08em;line-height:1.6">1.8 / SEC<br>SINCE OPEN</div>
     <div style="height:2px;background:var(--b1);border-radius:1px;margin-top:10px;overflow:hidden">
       <div style="height:100%;background:linear-gradient(90deg,var(--red),rgba(255,51,85,0.3));animation:hbpulse 2.4s ease-in-out infinite"></div>
@@ -269,7 +269,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:4px">NET POPULATION GAIN // SINCE YOU OPENED</div>
-      <div id="net-counter" style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--cyan);line-height:1">0</div>
+      <div id="net-counter" style="font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:400;color:var(--cyan);line-height:1;letter-spacing:.05em">+0</div>
     </div>
     <div style="text-align:right">
       <div id="births-today" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.08em;line-height:1.7"></div>
@@ -430,9 +430,14 @@ function resetBirthday() {
   document.getElementById('time-alive-input').style.display = 'block';
 }
 function renderTimeAlive() {
-  if (!dobMs) return;
+  if (!dobMs) {
+    document.getElementById('time-alive-display').style.display = 'none';
+    document.getElementById('time-alive-input').style.display = 'block';
+    return;
+  }
   document.getElementById('time-alive-input').style.display = 'none';
   document.getElementById('time-alive-display').style.display = 'block';
+  updateTimeAlive();
 }
 function updateTimeAlive() {
   if (!dobMs) return;
@@ -445,7 +450,7 @@ function updateTimeAlive() {
   const mins = Math.floor((totalSec % 3600) / 60);
   const secs = totalSec % 60;
   document.getElementById('alive-counter').innerHTML =
-    `<span style="color:var(--t1)">${years}</span> YRS &nbsp; <span style="color:var(--t1)">${days}</span> DAYS &nbsp; <span style="color:var(--t1)">${hours}</span> HRS &nbsp; <span style="color:var(--t1)">${mins}</span> MIN &nbsp; <span style="color:var(--t1)">${secs}</span> SEC`;
+    `<span style="color:var(--t1);font-family:'Share Tech Mono',monospace">${years}</span> YRS &nbsp; <span style="color:var(--t1);font-family:'Share Tech Mono',monospace">${days}</span> DAYS &nbsp; <span style="color:var(--t1);font-family:'Share Tech Mono',monospace">${hours}</span> HRS &nbsp; <span style="color:var(--t1);font-family:'Share Tech Mono',monospace">${mins}</span> MIN &nbsp; <span style="color:var(--t1);font-family:'Share Tech Mono',monospace">${secs}</span> SEC`;
   const totalHeartbeats = Math.floor(totalSec * 72 / 60).toLocaleString();
   const totalBreaths = Math.floor(totalSec * 15 / 60).toLocaleString();
   document.getElementById('alive-days').textContent =
@@ -762,3 +767,4 @@ loadAll();
 </script>
 </body>
 </html>
+
