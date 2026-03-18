@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#000000"/>
+<title>Intel Feed</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;800&family=Rajdhani:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--surf:#05050a;--surf2:#0a0a12;
+  --b1:rgba(0,255,200,0.07);--b2:rgba(0,255,200,0.14);
+  --t1:#e8f4f0;--t2:#7a9990;--t3:#3a5550;
+  --cyan:#00ffc8;--red:#ff3355;--amber:#ffaa00;--violet:#8855ff;--blue:#4a9eff;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--t1);min-height:100dvh;overscroll-behavior:none}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:1000}
+
+/* bar */
+.bar{position:sticky;top:0;z-index:99;background:rgba(0,0,0,0.96);border-bottom:1px solid var(--b2);padding:calc(12px + var(--st)) 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.bar::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.bar-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:600;color:var(--t1);letter-spacing:.2em}
+.bar-r{display:flex;align-items:center;gap:12px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.2s ease-in-out infinite}
+.live-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--red);letter-spacing:.12em}
+.bar-time{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--cyan)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* hero */
+.hero{padding:32px 20px 16px}
+.hero-sys{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:.12em;margin-bottom:8px}
+.hero-sys span{color:var(--cyan);opacity:0.7}
+.hero-title{font-family:'Orbitron',monospace;font-size:clamp(22px,5vw,36px);font-weight:800;color:var(--t1);letter-spacing:.08em;text-transform:uppercase;line-height:1.1}
+.hero-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-top:8px;letter-spacing:.08em}
+
+/* heartbeat hero */
+.heartbeat-section{margin:20px 20px 0;padding:20px;background:var(--surf);border:1px solid var(--b1);border-left:2px solid var(--red);position:relative;overflow:hidden}
+.heartbeat-section::before{content:'GLOBAL.HEARTBEAT';position:absolute;top:-8px;left:12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);background:var(--bg);padding:0 6px;letter-spacing:.1em}
+.hb-counter{font-family:'Orbitron',monospace;font-size:clamp(28px,7vw,48px);font-weight:800;color:var(--red);letter-spacing:.05em;line-height:1;text-shadow:0 0 30px rgba(255,51,85,0.3)}
+.hb-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.1em}
+.hb-bar{height:2px;background:var(--b1);margin-top:14px;border-radius:1px;overflow:hidden}
+.hb-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),rgba(255,51,85,0.3));animation:hbpulse 0.857s ease-in-out infinite;transform-origin:left}
+@keyframes hbpulse{0%,100%{opacity:0.4;transform:scaleX(0.6)}50%{opacity:1;transform:scaleX(1)}}
+
+/* grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
+.grid-full{grid-column:1/-1}
+
+/* card */
+.card{background:var(--surf);border:1px solid var(--b1);padding:14px 16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--card-accent,var(--cyan)),transparent);opacity:0.4}
+.card-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-label::before{content:'';width:10px;height:1px;background:var(--card-accent,var(--cyan));opacity:0.6}
+.card-value{font-family:'Orbitron',monospace;font-size:clamp(18px,4vw,26px);font-weight:700;color:var(--t1);line-height:1.1}
+.card-value.big{font-size:clamp(22px,5vw,32px)}
+.card-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);margin-top:5px;letter-spacing:.06em;line-height:1.5}
+.card-extra{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:6px;letter-spacing:.06em;line-height:1.6}
+.status-badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 8px;border-radius:1px;margin-top:8px;letter-spacing:.1em;text-transform:uppercase}
+.badge-green{background:rgba(0,255,200,0.1);color:var(--cyan);border:1px solid rgba(0,255,200,0.25)}
+.badge-amber{background:rgba(255,170,0,0.1);color:var(--amber);border:1px solid rgba(255,170,0,0.25)}
+.badge-red{background:rgba(255,51,85,0.1);color:var(--red);border:1px solid rgba(255,51,85,0.25)}
+.badge-violet{background:rgba(136,85,255,0.1);color:var(--violet);border:1px solid rgba(136,85,255,0.25)}
+.ld{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:.08em;animation:ldpulse 1.5s ease-in-out infinite}
+@keyframes ldpulse{0%,100%{opacity:0.4}50%{opacity:1}}
+
+/* ISS globe */
+.globe-wrap{position:relative;width:70px;height:70px;margin:8px auto 4px;flex-shrink:0}
+.globe{width:70px;height:70px;border-radius:50%;border:1px solid rgba(74,158,255,0.3);position:relative;overflow:hidden;background:radial-gradient(ellipse at 30% 30%,rgba(74,158,255,0.15),rgba(0,0,0,0.8))}
+.globe-grid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 10px,rgba(74,158,255,0.08) 10px,rgba(74,158,255,0.08) 11px),repeating-linear-gradient(90deg,transparent,transparent 10px,rgba(74,158,255,0.08) 10px,rgba(74,158,255,0.08) 11px)}
+.globe-orbit{position:absolute;inset:-10px;border:1px dashed rgba(74,158,255,0.2);border-radius:50%;animation:orbitrotate 8s linear infinite}
+.iss-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);transition:top 2s ease,left 2s ease}
+.iss-ring{position:absolute;width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,255,200,0.4);top:50%;left:50%;transform:translate(-50%,-50%);animation:issring 1.5s ease-out infinite;transition:top 2s ease,left 2s ease}
+@keyframes orbitrotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes issring{0%{opacity:1;width:8px;height:8px;margin:-4px 0 0 -4px}100%{opacity:0;width:24px;height:24px;margin:-12px 0 0 -12px}}
+
+/* earthquake pulses */
+.quake-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.quake-item{display:flex;align-items:center;gap:10px}
+.quake-pulse{width:12px;height:12px;border-radius:50%;flex-shrink:0;position:relative}
+.quake-pulse::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid currentColor;animation:qpulse 2s ease-out infinite}
+@keyframes qpulse{0%{opacity:0.8;transform:scale(1)}100%{opacity:0;transform:scale(2.5)}}
+.quake-mag{font-family:'Orbitron',monospace;font-size:13px;font-weight:700}
+.quake-loc{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.05em;line-height:1.4}
+
+/* sun */
+.sun-wrap{display:flex;justify-content:center;margin:8px 0}
+.sun{width:48px;height:48px;border-radius:50%;background:radial-gradient(ellipse,var(--amber),rgba(255,100,0,0.6));box-shadow:0 0 20px rgba(255,170,0,0.4),0 0 40px rgba(255,170,0,0.2);animation:sunpulse 3s ease-in-out infinite}
+@keyframes sunpulse{0%,100%{box-shadow:0 0 20px rgba(255,170,0,0.4),0 0 40px rgba(255,170,0,0.2)}50%{box-shadow:0 0 30px rgba(255,170,0,0.7),0 0 60px rgba(255,170,0,0.4)}}
+.solar-bar{height:4px;background:var(--b1);border-radius:2px;margin-top:10px;overflow:hidden}
+.solar-fill{height:100%;border-radius:2px;transition:width 1s ease;background:linear-gradient(90deg,var(--amber),var(--red))}
+
+/* moon */
+.moon-wrap{display:flex;justify-content:center;margin:8px 0}
+.moon-svg{filter:drop-shadow(0 0 8px rgba(200,200,255,0.4))}
+
+/* lightning */
+.lightning-count{font-family:'Orbitron',monospace;font-size:clamp(28px,6vw,40px);font-weight:800;color:var(--amber);text-shadow:0 0 20px rgba(255,170,0,0.4);line-height:1;animation:lcount 0.1s ease-in-out}
+.lightning-bolt{font-size:24px;display:inline-block;animation:lbolt 0.3s ease-in-out infinite alternate}
+@keyframes lbolt{from{opacity:0.6;transform:scale(0.95)}to{opacity:1;transform:scale(1.05)}}
+
+/* asteroid */
+.asteroid-track{position:relative;height:40px;margin:10px 0;background:var(--surf2);border-radius:2px;overflow:hidden}
+.asteroid-track-line{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,170,0,0.15)}
+.asteroid-earth{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;background:radial-gradient(ellipse at 35% 35%,#4a9eff,#0a2a4a);box-shadow:0 0 8px rgba(74,158,255,0.4)}
+.asteroid-obj{position:absolute;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px rgba(255,170,0,0.6);transition:left 2s ease}
+.asteroid-trail{position:absolute;top:50%;transform:translateY(-50%);height:1px;background:linear-gradient(90deg,transparent,rgba(255,170,0,0.4));transition:left 2s ease,width 2s ease}
+
+/* volcano */
+.volcano-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.volcano-item{display:flex;align-items:center;gap:8px}
+.volcano-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.volcano-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:.04em}
+.volcano-level{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em}
+
+/* aurora */
+.aurora-meter{height:8px;border-radius:4px;background:var(--b1);margin-top:10px;overflow:hidden;position:relative}
+.aurora-fill{height:100%;border-radius:4px;transition:width 1s ease;position:relative;overflow:hidden}
+.aurora-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:aurshift 2s linear infinite}
+@keyframes aurshift{from{transform:translateX(-100%)}to{transform:translateX(200%)}}}
+
+/* planes */
+.planes-big{display:flex;align-items:center;gap:12px}
+.plane-icon{font-size:28px;animation:planefloat 3s ease-in-out infinite}
+@keyframes planefloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-4px) rotate(5deg)}}
+
+/* your vitals */
+.vitals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.vital{background:var(--surf2);padding:10px;text-align:center}
+.vital-val{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--cyan);line-height:1}
+.vital-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+
+/* refresh */
+.refresh-bar{padding:12px 20px 0;display:flex;justify-content:flex-end}
+.refresh-btn{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);background:transparent;border:1px solid var(--b1);padding:5px 12px;cursor:pointer;letter-spacing:.1em;-webkit-tap-highlight-color:transparent}
+.refresh-btn:active{background:var(--surf2);color:var(--cyan)}
+
+.bottom-pad{height:calc(20px + var(--sb))}
+
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero{animation:up .4s ease both}
+.heartbeat-section{animation:up .4s .06s ease both}
+.grid{animation:up .4s .12s ease both}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:var(--b2)}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-title">INTEL FEED</div>
+  <div class="bar-r">
+    <div class="live-dot"></div>
+    <div class="live-lbl">LIVE</div>
+    <div class="bar-time" id="clock"></div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-sys">SYS.INTEL // NODE: <span>ETHAN_SPADE</span> // CLEARANCE: ALPHA</div>
+  <div class="hero-title">Global<br>Signal Feed</div>
+  <div class="hero-sub" id="dateline">ACQUIRING DATE...</div>
+</div>
+
+<!-- WORLD POPULATION -->
+<div style="margin:20px 20px 0;background:var(--surf);border:1px solid var(--b1);border-left:2px solid var(--cyan);padding:20px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-8px;left:12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);background:var(--bg);padding:0 6px;letter-spacing:.1em">WORLD.POPULATION // LIVE</div>
+  <div id="world-pop" style="font-family:'Orbitron',monospace;font-size:clamp(26px,6vw,44px);font-weight:800;color:var(--cyan);letter-spacing:.04em;line-height:1;text-shadow:0 0 30px rgba(0,255,200,0.2)">8,200,000,000</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.1em">HUMANS ALIVE RIGHT NOW // ESTIMATED</div>
+  <div style="height:1px;background:var(--b1);margin:12px 0"></div>
+  <!-- Day/Night Split -->
+  <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.1em;margin-bottom:8px">DAY / NIGHT SPLIT // CURRENT</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:600;color:var(--amber)" id="day-pct">—%</div>
+    <div style="flex:1;height:8px;background:var(--surf2);border-radius:4px;overflow:hidden;position:relative">
+      <div id="day-bar" style="position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),rgba(255,170,0,0.4));border-radius:4px;transition:width 1s ease;width:50%"></div>
+      <div id="night-bar" style="position:absolute;right:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(136,85,255,0.4),var(--violet));border-radius:4px;transition:width 1s ease;width:50%"></div>
+    </div>
+    <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:600;color:var(--violet)" id="night-pct">—%</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:5px">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3)" id="day-humans">— IN DAYLIGHT</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3)" id="night-humans">— IN DARKNESS</div>
+  </div>
+</div>
+
+<!-- TIME ALIVE -->
+<div style="margin:10px 20px 0;background:var(--surf);border:1px solid var(--b1);border-left:2px solid var(--violet);padding:16px;position:relative">
+  <div style="position:absolute;top:-8px;left:12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);background:var(--bg);padding:0 6px;letter-spacing:.1em">YOUR.LIFETIME // OPERATIONAL</div>
+  <div id="time-alive-display" style="display:none">
+    <div id="alive-counter" style="font-family:'Orbitron',monospace;font-size:clamp(13px,3vw,18px);font-weight:700;color:var(--violet);line-height:1.4;letter-spacing:.04em"></div>
+    <div id="alive-days" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-top:8px;letter-spacing:.08em;line-height:1.7"></div>
+    <button onclick="resetBirthday()" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);background:transparent;border:1px solid var(--b1);padding:4px 10px;cursor:pointer;margin-top:10px;letter-spacing:.08em">CHANGE DOB</button>
+  </div>
+  <div id="time-alive-input">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:.08em;margin-bottom:10px">ENTER YOUR DATE OF BIRTH TO CALCULATE YOUR OPERATIONAL LIFETIME</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="date" id="dob-input" style="font-family:'Share Tech Mono',monospace;font-size:12px;background:var(--surf2);border:1px solid var(--b1);color:var(--t1);padding:8px 12px;outline:none;letter-spacing:.06em;-webkit-appearance:none;flex:1;min-width:140px"/>
+      <button onclick="saveDOB()" style="font-family:'Orbitron',monospace;font-size:10px;font-weight:600;color:var(--violet);background:transparent;border:1px solid rgba(136,85,255,0.3);padding:8px 16px;cursor:pointer;letter-spacing:.15em;white-space:nowrap">ACTIVATE →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CO2 + HUMAN FACT -->
+<div style="margin:10px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+  <!-- CO2 -->
+  <div style="background:var(--surf);border:1px solid var(--b1);border-left:2px solid var(--amber);padding:14px 16px;position:relative">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--amber),transparent);opacity:0.3"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:10px;height:1px;background:var(--amber);opacity:0.6"></span>CO₂ // ATMOSPHERE
+    </div>
+    <div id="co2-val" style="font-family:'Orbitron',monospace;font-size:26px;font-weight:800;color:var(--amber);line-height:1">—</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:5px;letter-spacing:.08em">PPM // MAUNA_LOA_NOAA</div>
+    <div id="co2-sub" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:4px;letter-spacing:.06em;line-height:1.6"></div>
+  </div>
+
+  <!-- HUMAN FACT -->
+  <div style="background:var(--surf);border:1px solid var(--b1);border-left:2px solid var(--cyan);padding:14px 16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cyan),transparent);opacity:0.3"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:10px;height:1px;background:var(--cyan);opacity:0.6"></span>HUMAN FACT
+    </div>
+    <div id="human-fact" style="font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--t2);line-height:1.6;font-weight:300"></div>
+    <button onclick="nextFact()" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);background:transparent;border:1px solid var(--b1);padding:3px 8px;cursor:pointer;margin-top:10px;letter-spacing:.08em">NEXT</button>
+  </div>
+
+</div>
+
+
+
+<div style="margin:10px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+  <!-- BIRTHS -->
+  <div style="background:var(--surf);border:1px solid var(--b1);border-left:2px solid #00ff88;padding:14px 16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,#00ff88,transparent);opacity:0.3"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:10px;height:1px;background:#00ff88;opacity:0.6"></span>BIRTHS
+    </div>
+    <div id="births-counter" style="font-family:'Orbitron',monospace;font-size:clamp(20px,5vw,32px);font-weight:800;color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,0.3);line-height:1">0</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:6px;letter-spacing:.08em;line-height:1.6">4.3 / SEC<br>SINCE OPEN</div>
+    <div style="height:2px;background:var(--b1);border-radius:1px;margin-top:10px;overflow:hidden">
+      <div style="height:100%;background:linear-gradient(90deg,#00ff88,rgba(0,255,136,0.3));animation:hbpulse 1.4s ease-in-out infinite"></div>
+    </div>
+  </div>
+
+  <!-- DEATHS -->
+  <div style="background:var(--surf);border:1px solid var(--b1);border-left:2px solid var(--red);padding:14px 16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--red),transparent);opacity:0.3"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:10px;height:1px;background:var(--red);opacity:0.6"></span>DEATHS
+    </div>
+    <div id="deaths-counter" style="font-family:'Orbitron',monospace;font-size:clamp(20px,5vw,32px);font-weight:800;color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.3);line-height:1">0</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);margin-top:6px;letter-spacing:.08em;line-height:1.6">1.8 / SEC<br>SINCE OPEN</div>
+    <div style="height:2px;background:var(--b1);border-radius:1px;margin-top:10px;overflow:hidden">
+      <div style="height:100%;background:linear-gradient(90deg,var(--red),rgba(255,51,85,0.3));animation:hbpulse 2.4s ease-in-out infinite"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NET POPULATION -->
+<div style="margin:8px 20px 0;background:var(--surf);border:1px solid var(--b1);padding:12px 16px;position:relative">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.12em;margin-bottom:4px">NET POPULATION GAIN // SINCE YOU OPENED</div>
+      <div id="net-counter" style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--cyan);line-height:1">0</div>
+    </div>
+    <div style="text-align:right">
+      <div id="births-today" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.08em;line-height:1.7"></div>
+    </div>
+  </div>
+  <div style="height:4px;background:var(--b1);border-radius:2px;margin-top:10px;overflow:hidden">
+    <div id="net-bar" style="height:100%;background:linear-gradient(90deg,#00ff88,var(--cyan));border-radius:2px;transition:width 0.5s ease;width:60%"></div>
+  </div>
+</div>
+
+<div class="refresh-bar">
+  <button class="refresh-btn" onclick="loadAll()">↻ REFRESH ALL SIGNALS</button>
+</div>
+
+<div class="grid">
+
+  <!-- ISS -->
+  <div class="card grid-full" style="--card-accent:var(--blue)">
+    <div class="card-label">ISS // Current Position</div>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="globe-wrap">
+        <div class="globe">
+          <div class="globe-grid"></div>
+          <div class="globe-orbit"></div>
+          <div class="iss-dot" id="iss-dot"></div>
+          <div class="iss-ring" id="iss-ring"></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <div id="iss-content" class="ld">ACQUIRING_SIGNAL...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANES -->
+  <div class="card" style="--card-accent:var(--cyan)">
+    <div class="card-label">Planes Airborne</div>
+    <div class="planes-big">
+      <div class="plane-icon">✈</div>
+      <div>
+        <div class="card-value big" id="planes-count" style="color:var(--cyan)">—</div>
+        <div class="card-sub" id="planes-sub">GLOBAL // RIGHT NOW</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOON -->
+  <div class="card" style="--card-accent:#aaaaff">
+    <div class="card-label">Moon Phase</div>
+    <div class="moon-wrap">
+      <svg class="moon-svg" width="52" height="52" viewBox="0 0 52 52" id="moon-svg">
+        <circle cx="26" cy="26" r="22" fill="#1a1a2e" stroke="rgba(170,170,255,0.3)" stroke-width="1"/>
+        <text x="26" y="31" text-anchor="middle" font-size="28" id="moon-emoji">🌙</text>
+      </svg>
+    </div>
+    <div id="moon-content" class="ld" style="text-align:center">CALCULATING...</div>
+  </div>
+
+  <!-- SOLAR -->
+  <div class="card grid-full" style="--card-accent:var(--amber)">
+    <div class="card-label">Solar Activity</div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="sun-wrap" style="margin:0;flex-shrink:0">
+        <div class="sun" id="sun-visual"></div>
+      </div>
+      <div style="flex:1">
+        <div id="solar-content" class="ld">SCANNING_HELIOSPHERE...</div>
+        <div class="solar-bar"><div class="solar-fill" id="solar-fill" style="width:30%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EARTHQUAKES -->
+  <div class="card grid-full" style="--card-accent:var(--red)">
+    <div class="card-label">Seismic Activity // Last 24h</div>
+    <div id="quake-content" class="ld">SCANNING_FAULT_LINES...</div>
+  </div>
+
+  <!-- LIGHTNING -->
+  <div class="card" style="--card-accent:var(--amber)">
+    <div class="card-label">⚡ Lightning</div>
+    <div class="lightning-count" id="lightning-count">—</div>
+    <div class="card-sub" id="lightning-sub">GLOBAL // LAST HR</div>
+  </div>
+
+  <!-- ASTEROID -->
+  <div class="card" style="--card-accent:var(--amber)">
+    <div class="card-label">☄ Near-Earth Objects</div>
+    <div id="asteroid-content" class="ld">SCANNING...</div>
+  </div>
+
+  <!-- VOLCANOES -->
+  <div class="card grid-full" style="--card-accent:var(--red)">
+    <div class="card-label">🌋 Active Volcanoes</div>
+    <div id="volcano-content" class="ld">SCANNING_MAGMA_CHAMBERS...</div>
+  </div>
+
+  <!-- YOUR VITALS -->
+  <div class="card grid-full" style="--card-accent:var(--cyan)">
+    <div class="card-label">Your Vitals // Local Node</div>
+    <div class="vitals-grid" id="vitals-grid"></div>
+  </div>
+
+</div>
+
+<div class="bottom-pad"></div>
+
+<script>
+// ── CLOCK ─────────────────────────────────────────────────────────
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+function initHeader(){
+  const days=['SUN','MON','TUE','WED','THU','FRI','SAT'],months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],n=new Date();
+  document.getElementById('dateline').textContent=`${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()} // NAMPA_IDAHO_US`;
+}
+
+// ── WORLD POPULATION + DAY/NIGHT ────────────────────────────────
+const WORLD_POP_BASE = 8200000000;
+const WORLD_POP_NET_PER_SEC = 2.5; // net births minus deaths
+
+function updateWorldPop(elapsed) {
+  const pop = Math.floor(WORLD_POP_BASE + elapsed * WORLD_POP_NET_PER_SEC);
+  document.getElementById('world-pop').textContent = pop.toLocaleString();
+  // Day/night split — calculated from UTC hour
+  // ~55% of world population lives in longitudes where it's currently daytime
+  const utcH = new Date().getUTCHours();
+  // Rough sinusoidal approximation of daylit population fraction
+  const dayFrac = 0.5 + 0.12 * Math.sin((utcH - 6) * Math.PI / 12);
+  const dayPct = Math.round(dayFrac * 100);
+  const nightPct = 100 - dayPct;
+  const dayHumans = Math.floor(pop * dayFrac);
+  const nightHumans = pop - dayHumans;
+  document.getElementById('day-pct').textContent = dayPct + '%';
+  document.getElementById('night-pct').textContent = nightPct + '%';
+  document.getElementById('day-bar').style.width = dayPct + '%';
+  document.getElementById('night-bar').style.width = nightPct + '%';
+  document.getElementById('day-humans').textContent = (dayHumans / 1e9).toFixed(2) + 'B IN DAYLIGHT';
+  document.getElementById('night-humans').textContent = (nightHumans / 1e9).toFixed(2) + 'B IN DARKNESS';
+}
+
+// ── TIME ALIVE ────────────────────────────────────────────────────
+let dobMs = null;
+try {
+  const saved = localStorage.getItem('em_dob');
+  if (saved) dobMs = parseInt(saved);
+} catch(e) {}
+
+function saveDOB() {
+  const val = document.getElementById('dob-input').value;
+  if (!val) return;
+  dobMs = new Date(val).getTime();
+  localStorage.setItem('em_dob', dobMs);
+  renderTimeAlive();
+}
+function resetBirthday() {
+  dobMs = null;
+  localStorage.removeItem('em_dob');
+  document.getElementById('time-alive-display').style.display = 'none';
+  document.getElementById('time-alive-input').style.display = 'block';
+}
+function renderTimeAlive() {
+  if (!dobMs) return;
+  document.getElementById('time-alive-input').style.display = 'none';
+  document.getElementById('time-alive-display').style.display = 'block';
+}
+function updateTimeAlive() {
+  if (!dobMs) return;
+  const now = Date.now();
+  const totalMs = now - dobMs;
+  const totalSec = Math.floor(totalMs / 1000);
+  const years = Math.floor(totalSec / 31557600);
+  const days = Math.floor((totalSec % 31557600) / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+  document.getElementById('alive-counter').innerHTML =
+    `<span style="color:var(--t1)">${years}</span> YRS &nbsp; <span style="color:var(--t1)">${days}</span> DAYS &nbsp; <span style="color:var(--t1)">${hours}</span> HRS &nbsp; <span style="color:var(--t1)">${mins}</span> MIN &nbsp; <span style="color:var(--t1)">${secs}</span> SEC`;
+  const totalHeartbeats = Math.floor(totalSec * 72 / 60).toLocaleString();
+  const totalBreaths = Math.floor(totalSec * 15 / 60).toLocaleString();
+  document.getElementById('alive-days').textContent =
+    `~${totalHeartbeats} HEARTBEATS // ~${totalBreaths} BREATHS TAKEN`;
+}
+
+// ── CO2 ───────────────────────────────────────────────────────────
+async function loadCO2() {
+  try {
+    const r = await fetch('https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Indicator_3_2_Climate_Indicators_Monthly_Atmospheric_CO2_concentration/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&orderByFields=Indicator+desc&resultRecordCount=1');
+    const d = await r.json();
+    const ppm = d.features?.[0]?.attributes?.Value;
+    if (ppm) {
+      document.getElementById('co2-val').textContent = parseFloat(ppm).toFixed(1);
+      document.getElementById('co2-sub').textContent = `PRE-INDUSTRIAL: 280 PPM\n+${(parseFloat(ppm)-280).toFixed(1)} PPM SINCE 1750`.replace('\n','<br>');
+      document.getElementById('co2-sub').innerHTML = `PRE-INDUSTRIAL: 280 PPM<br>+${(parseFloat(ppm)-280).toFixed(1)} PPM SINCE 1750`;
+    } else throw new Error('no data');
+  } catch(e) {
+    // Fallback to known recent value
+    document.getElementById('co2-val').textContent = '424.6';
+    document.getElementById('co2-sub').innerHTML = 'PRE-INDUSTRIAL: 280 PPM<br>+144.6 PPM SINCE 1750';
+  }
+}
+
+// ── HUMAN FACTS ───────────────────────────────────────────────────
+const FACTS = [
+  "Right now, approximately 50,000 people are airborne over the United States alone.",
+  "In the time you've been on this page, more people have been born than live in most small towns.",
+  "Every 60 seconds, 258 babies are born and 108 people die — a net gain of 150 humans per minute.",
+  "At this exact moment, roughly 2 billion people are asleep.",
+  "Somewhere right now, a doctor is delivering a baby for the first time in their career.",
+  "The human heart beats about 100,000 times per day. Every person alive is running that same program right now.",
+  "At any given moment, 500,000 people are in the air on commercial flights worldwide.",
+  "In the last hour, more humans have taken their first breath than the entire population of many cities.",
+  "Right now, approximately 140 million people are reading a book.",
+  "Every second, 6,000 lightning bolts strike the Earth. Most of them, no one sees.",
+  "At this moment, the ISS is traveling at 28,000 km/h and completing an orbit every 90 minutes.",
+  "Somewhere on Earth right now, it is someone's 100th birthday.",
+  "The number of people who have ever lived is estimated at 108 billion. About 7.5% of them are alive right now.",
+  "Right now, more than 1 million people are on the ocean — on ships, submarines, or oil platforms.",
+  "In the time you've spent on this page, the universe has expanded by billions of kilometers in every direction.",
+  "Every 11 seconds, someone in the world becomes a millionaire for the first time.",
+  "At this exact moment, 3.5 billion people are connected to the internet.",
+  "Somewhere right now, someone is falling in love for the first time.",
+  "The person who will live to 150 years old has almost certainly already been born.",
+  "Right now, approximately 200,000 people are getting married somewhere on Earth today."
+];
+let factIdx = Math.floor(Math.random() * FACTS.length);
+function renderFact() {
+  document.getElementById('human-fact').textContent = FACTS[factIdx % FACTS.length];
+}
+function nextFact() { factIdx++; renderFact(); }
+setInterval(() => { factIdx++; renderFact(); }, 60000);
+
+
+const PAGE_LOAD=Date.now();
+const BPS=8000000000*72/60;
+const BIRTHS_PER_SEC=4.3;
+const DEATHS_PER_SEC=1.8;
+const NET_PER_SEC=BIRTHS_PER_SEC-DEATHS_PER_SEC; // ~2.5
+const BIRTHS_TODAY_BASE=Math.floor((Date.now()-new Date().setHours(0,0,0,0))/1000*BIRTHS_PER_SEC);
+const DEATHS_TODAY_BASE=Math.floor((Date.now()-new Date().setHours(0,0,0,0))/1000*DEATHS_PER_SEC);
+
+function updateCounters(){
+  const elapsed=(Date.now()-PAGE_LOAD)/1000;
+  document.getElementById('hb-counter').textContent=Math.floor(elapsed*BPS).toLocaleString();
+  const births=Math.floor(elapsed*BIRTHS_PER_SEC);
+  const deaths=Math.floor(elapsed*DEATHS_PER_SEC);
+  const net=births-deaths;
+  document.getElementById('births-counter').textContent=births.toLocaleString();
+  document.getElementById('deaths-counter').textContent=deaths.toLocaleString();
+  document.getElementById('net-counter').textContent='+'+net.toLocaleString();
+  const pct=Math.min(100,Math.round(births/(births+deaths)*100));
+  document.getElementById('net-bar').style.width=pct+'%';
+  const totalBornToday=BIRTHS_TODAY_BASE+births;
+  const totalDiedToday=DEATHS_TODAY_BASE+deaths;
+  document.getElementById('births-today').innerHTML=`~${totalBornToday.toLocaleString()} BORN TODAY<br>~${totalDiedToday.toLocaleString()} DIED TODAY`;
+  updateWorldPop(elapsed);
+  updateTimeAlive();
+}
+setInterval(updateCounters,50);
+
+// ── ISS ───────────────────────────────────────────────────────────
+async function loadISS(){
+  try{
+    const d=await fetch('https://api.wheretheiss.at/v1/satellites/25544').then(r=>r.json());
+    const lat=d.latitude.toFixed(2),lng=d.longitude.toFixed(2),alt=Math.round(d.altitude),spd=Math.round(d.velocity);
+    // Map lat/lng to globe position (0-100%)
+    const x=((parseFloat(lng)+180)/360*100).toFixed(1);
+    const y=((90-parseFloat(lat))/180*100).toFixed(1);
+    const dot=document.getElementById('iss-dot');
+    const ring=document.getElementById('iss-ring');
+    dot.style.left=x+'%';dot.style.top=y+'%';
+    ring.style.left=x+'%';ring.style.top=y+'%';
+    // Get country/region
+    const region=parseFloat(lat)>0?`${parseFloat(lat).toFixed(0)}°N`:`${Math.abs(parseFloat(lat)).toFixed(0)}°S`;
+    const lngDir=parseFloat(lng)>0?`${parseFloat(lng).toFixed(0)}°E`:`${Math.abs(parseFloat(lng)).toFixed(0)}°W`;
+    document.getElementById('iss-content').innerHTML=`
+      <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--blue);margin-bottom:6px">${region} / ${lngDir}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:.06em;line-height:1.8">
+        ALT: ${alt} KM<br>
+        SPD: ${spd.toLocaleString()} KM/H<br>
+        VIS: ${d.visibility.toUpperCase()}
+      </div>
+      <div class="status-badge badge-green">TRACKING</div>`;
+  }catch(e){
+    document.getElementById('iss-content').innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--t3)">SIGNAL_LOST</div>';
+  }
+}
+
+// ── PLANES ────────────────────────────────────────────────────────
+function loadPlanes(){
+  // OpenSky Network is rate-limited — use realistic estimate based on time of day
+  const h=new Date().getUTCHours();
+  const base=h>=6&&h<=22?12000:7000;
+  const variance=Math.floor(Math.random()*2000)-1000;
+  const count=(base+variance).toLocaleString();
+  document.getElementById('planes-count').textContent=count;
+  document.getElementById('planes-sub').textContent='EST // GLOBAL AIRSPACE';
+}
+
+// ── MOON ─────────────────────────────────────────────────────────
+function getMoonPhase(){
+  const now=new Date(),known=new Date('2000-01-06T18:14:00Z');
+  const diff=(now-known)/(1000*60*60*24);
+  const cycle=29.53059;
+  const phase=((diff%cycle)+cycle)%cycle;
+  const illum=Math.round((1-Math.cos(2*Math.PI*phase/cycle))/2*100);
+  let name,emoji;
+  if(phase<1.85){name='NEW MOON';emoji='🌑';}
+  else if(phase<7.38){name='WAXING CRESCENT';emoji='🌒';}
+  else if(phase<11.07){name='FIRST QUARTER';emoji='🌓';}
+  else if(phase<14.77){name='WAXING GIBBOUS';emoji='🌔';}
+  else if(phase<18.46){name='FULL MOON';emoji='🌕';}
+  else if(phase<22.15){name='WANING GIBBOUS';emoji='🌖';}
+  else if(phase<25.85){name='LAST QUARTER';emoji='🌗';}
+  else if(phase<29.53){name='WANING CRESCENT';emoji='🌘';}
+  else{name='NEW MOON';emoji='🌑';}
+  document.getElementById('moon-emoji').textContent=emoji;
+  document.getElementById('moon-content').innerHTML=`
+    <div style="font-family:'Orbitron',monospace;font-size:12px;font-weight:600;color:#aaaaff;letter-spacing:.1em">${name}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-top:4px;letter-spacing:.08em">ILLUMINATION: ${illum}%</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.08em">CYCLE DAY: ${Math.floor(phase)}/29</div>`;
+}
+
+// ── SOLAR ─────────────────────────────────────────────────────────
+async function loadSolar(){
+  try{
+    const d=await fetch('https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json').then(r=>r.json());
+    const latest=d[d.length-1];
+    const ssn=parseFloat(latest.ssn||0);
+    const pct=Math.min(100,Math.round(ssn/200*100));
+    let level,badge,cls;
+    if(ssn<30){level='QUIET';badge='badge-green';cls='LOW';}
+    else if(ssn<100){level='MODERATE';badge='badge-amber';cls='MOD';}
+    else{level='ELEVATED';badge='badge-red';cls='HIGH';}
+    document.getElementById('solar-content').innerHTML=`
+      <div style="font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--amber)">${level}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);margin-top:4px;letter-spacing:.06em;line-height:1.8">SUNSPOT NUM: ${Math.round(ssn)}<br>SOLAR CYCLE 25 // ACTIVE</div>
+      <div class="status-badge ${badge}">${cls}_ACTIVITY</div>`;
+    document.getElementById('solar-fill').style.width=pct+'%';
+  }catch(e){
+    // Fallback
+    document.getElementById('solar-content').innerHTML=`
+      <div style="font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--amber)">MODERATE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);margin-top:4px;letter-spacing:.06em">SOLAR CYCLE 25 // ACTIVE<br>SIGNAL INTERMITTENT</div>`;
+    document.getElementById('solar-fill').style.width='45%';
+  }
+}
+
+// ── EARTHQUAKES ──────────────────────────────────────────────────
+async function loadQuakes(){
+  try{
+    const end=new Date().toISOString(),start=new Date(Date.now()-86400000).toISOString();
+    const url=`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start}&endtime=${end}&minmagnitude=5.0&orderby=magnitude&limit=4`;
+    const d=await fetch(url).then(r=>r.json());
+    const quakes=d.features;
+    if(!quakes.length){document.getElementById('quake-content').innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--t3)">NO_SIGNIFICANT_ACTIVITY // LAST 24H</div>';return;}
+    const total5plus=quakes.length;
+    let html=`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-bottom:10px;letter-spacing:.08em">${total5plus} EVENTS M5.0+ // LAST 24H</div><div class="quake-list">`;
+    quakes.slice(0,3).forEach(q=>{
+      const mag=q.properties.mag.toFixed(1);
+      const place=q.properties.place;
+      let col=mag>=7?'var(--red)':mag>=6?'var(--amber)':'var(--cyan)';
+      html+=`<div class="quake-item">
+        <div class="quake-pulse" style="background:${col};color:${col};width:12px;height:12px;border-radius:50%;flex-shrink:0"></div>
+        <div class="quake-mag" style="color:${col};min-width:36px">M${mag}</div>
+        <div class="quake-loc">${place}</div>
+      </div>`;
+    });
+    html+='</div>';
+    document.getElementById('quake-content').innerHTML=html;
+  }catch(e){
+    document.getElementById('quake-content').innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--t3)">SIGNAL_INTERRUPTED // RETRY</div>';
+  }
+}
+
+// ── LIGHTNING ────────────────────────────────────────────────────
+function loadLightning(){
+  // Blitzortung doesn't have a public API — use realistic estimate
+  const base=1800000,variance=Math.floor(Math.random()*400000)-200000;
+  const count=(base+variance).toLocaleString();
+  document.getElementById('lightning-count').textContent=count;
+  document.getElementById('lightning-sub').textContent='EST STRIKES // LAST 60 MIN';
+}
+
+// ── ASTEROIDS ────────────────────────────────────────────────────
+async function loadAsteroids(){
+  try{
+    const today=new Date().toISOString().slice(0,10);
+    const url=`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=DEMO_KEY`;
+    const d=await fetch(url).then(r=>r.json());
+    const neos=d.near_earth_objects[today]||[];
+    if(!neos.length){document.getElementById('asteroid-content').innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--t3)">NO_NEOs_TODAY // ALL_CLEAR</div>';return;}
+    // Sort by closest approach
+    neos.sort((a,b)=>parseFloat(a.close_approach_data[0].miss_distance.lunar)-parseFloat(b.close_approach_data[0].miss_distance.lunar));
+    const closest=neos[0];
+    const dist=parseFloat(closest.close_approach_data[0].miss_distance.lunar).toFixed(1);
+    const dia=closest.estimated_diameter.meters;
+    const avgDia=Math.round((dia.estimated_diameter_min+dia.estimated_diameter_max)/2);
+    const hazardous=closest.is_potentially_hazardous_asteroid;
+    // Animate position on track
+    const pct=Math.min(85,Math.max(5,100-(parseFloat(dist)/50*85)));
+    document.getElementById('asteroid-content').innerHTML=`
+      <div style="font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--amber)">${dist} LD</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t2);margin-top:4px;letter-spacing:.06em;line-height:1.7">
+        CLOSEST: ${closest.name.replace('(','').replace(')','')}<br>
+        DIAMETER: ~${avgDia}M<br>
+        TOTAL TODAY: ${neos.length} NEOs
+      </div>
+      <div class="status-badge ${hazardous?'badge-red':'badge-green'}">${hazardous?'HAZARDOUS':'NOMINAL'}</div>
+      <div class="asteroid-track" style="margin-top:10px">
+        <div class="asteroid-track-line"></div>
+        <div class="asteroid-earth"></div>
+        <div class="asteroid-obj" style="left:${pct}%"></div>
+        <div class="asteroid-trail" style="left:${pct}%;width:${100-pct-8}%;right:26px"></div>
+      </div>`;
+  }catch(e){
+    document.getElementById('asteroid-content').innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--t3)">API_LIMIT_REACHED // RETRY_LATER</div>';
+  }
+}
+
+// ── VOLCANOES ────────────────────────────────────────────────────
+function loadVolcanoes(){
+  // Smithsonian GVP doesn't have a free real-time JSON API — use known active list
+  const volcanoes=[
+    {name:'Etna',location:'Sicily, Italy',level:'ORANGE',color:'var(--amber)'},
+    {name:'Kilauea',location:'Hawaii, USA',level:'ORANGE',color:'var(--amber)'},
+    {name:'Stromboli',location:'Italy',level:'YELLOW',color:'#ffdd00'},
+    {name:'Sakurajima',location:'Japan',level:'ORANGE',color:'var(--amber)'},
+    {name:'Popocatépetl',location:'Mexico',level:'YELLOW',color:'#ffdd00'},
+  ];
+  const html=`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);margin-bottom:10px;letter-spacing:.08em">${volcanoes.length} KNOWN ACTIVE // CURRENT</div>
+    <div class="volcano-list">${volcanoes.map(v=>`
+      <div class="volcano-item">
+        <div class="volcano-dot" style="background:${v.color};box-shadow:0 0 6px ${v.color}"></div>
+        <div style="flex:1">
+          <span class="volcano-name">${v.name}</span>
+          <span class="volcano-name" style="color:var(--t3)"> // ${v.location}</span>
+        </div>
+        <div class="volcano-level" style="color:${v.color}">${v.level}</div>
+      </div>`).join('')}</div>`;
+  document.getElementById('volcano-content').innerHTML=html;
+}
+
+// ── YOUR VITALS ──────────────────────────────────────────────────
+function loadVitals(){
+  // Pull from localStorage shared with morning app
+  let sleep=null,mirrorCount=0,todos=[];
+  try{
+    const sd=JSON.parse(localStorage.getItem('em_sleep')||'{}');
+    if(sd.history&&sd.history.length){
+      const last=sd.history[sd.history.length-1];
+      if(last.duration)sleep=last.duration.toFixed(1);
+    }
+  }catch(e){}
+  try{
+    const md=JSON.parse(localStorage.getItem('em_mirror')||'{}');
+    mirrorCount=md.answers?md.answers.length:0;
+  }catch(e){}
+  try{
+    todos=JSON.parse(localStorage.getItem('em_todos')||'[]');
+  }catch(e){}
+  const tasksLeft=todos.filter(t=>!t.done).length;
+  const h=new Date().getHours();
+  const tod=h<6?'DEEP_NIGHT':h<12?'MORNING':h<17?'AFTERNOON':h<21?'EVENING':'NIGHT';
+  document.getElementById('vitals-grid').innerHTML=`
+    <div class="vital"><div class="vital-val">${sleep?sleep+'H':'N/A'}</div><div class="vital-lbl">Last Sleep</div></div>
+    <div class="vital"><div class="vital-val">${mirrorCount}</div><div class="vital-lbl">Mirror Days</div></div>
+    <div class="vital"><div class="vital-val">${tasksLeft}</div><div class="vital-lbl">Tasks Open</div></div>
+    <div class="vital" style="grid-column:1/-1"><div class="vital-val" style="font-size:13px;letter-spacing:.1em">${tod}</div><div class="vital-lbl">Current Phase</div></div>`;
+}
+
+// ── LOAD ALL ─────────────────────────────────────────────────────
+function loadAll(){
+  loadISS();
+  loadPlanes();
+  getMoonPhase();
+  loadSolar();
+  loadQuakes();
+  loadLightning();
+  loadAsteroids();
+  loadVolcanoes();
+  loadVitals();
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+initHeader();tick();setInterval(tick,10000);
+renderFact();
+renderTimeAlive();
+loadCO2();
+setInterval(loadISS,10000);
+loadAll();
+</script>
+</body>
+</html>
