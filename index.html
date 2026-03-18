@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -142,6 +142,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div class="hero-sys">SYS.INTEL // NODE: <span>ETHAN_SPADE</span> // CLEARANCE: ALPHA</div>
   <div class="hero-title">Global<br>Signal Feed</div>
   <div class="hero-sub" id="dateline">ACQUIRING DATE...</div>
+</div>
+
+<!-- HEARTBEAT -->
+<div class="heartbeat-section" style="margin:20px 20px 0">
+  <div class="card-label" style="margin-bottom:8px">Global heartbeats since you opened this page</div>
+  <div class="hb-counter" id="hb-counter">0</div>
+  <div class="hb-label">BEATS // 8,000,000,000 HUMANS // ~72 BPM AVG</div>
+  <div class="hb-bar"><div class="hb-bar-fill"></div></div>
 </div>
 
 <!-- WORLD POPULATION -->
@@ -495,19 +503,20 @@ setInterval(() => { factIdx++; renderFact(); }, 60000);
 
     // heartbeat
     var hb = Math.floor(elapsed * 9600000000);
-    document.getElementById('hb-counter').textContent = hb.toLocaleString();
+    var hbEl = document.getElementById('hb-counter');
+    if(hbEl) hbEl.textContent = hb.toLocaleString();
 
     // births
     var births = Math.floor(elapsed * 4.3);
-    document.getElementById('births-counter').textContent = births.toLocaleString();
+    var bEl=document.getElementById('births-counter'); if(bEl) bEl.textContent=births.toLocaleString();
 
     // deaths
     var deaths = Math.floor(elapsed * 1.8);
-    document.getElementById('deaths-counter').textContent = deaths.toLocaleString();
+    var dEl=document.getElementById('deaths-counter'); if(dEl) dEl.textContent=deaths.toLocaleString();
 
     // net
     var net = births - deaths;
-    document.getElementById('net-counter').textContent = '+' + net.toLocaleString();
+    var nEl=document.getElementById('net-counter'); if(nEl) nEl.textContent='+'+net.toLocaleString();
 
     // net bar
     var pct = births + deaths > 0 ? Math.round(births / (births + deaths) * 100) : 70;
@@ -520,7 +529,7 @@ setInterval(() => { factIdx++; renderFact(); }, 60000);
 
     // world pop
     var pop = Math.floor(8200000000 + elapsed * 2.5);
-    document.getElementById('world-pop').textContent = pop.toLocaleString();
+    var wpEl=document.getElementById('world-pop'); if(wpEl) wpEl.textContent=pop.toLocaleString();
 
     // day/night
     var utcH = new Date().getUTCHours();
@@ -775,5 +784,6 @@ loadAll();
 </script>
 </body>
 </html>
+
 
 
