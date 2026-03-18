@@ -485,28 +485,61 @@ setInterval(() => { factIdx++; renderFact(); }, 60000);
 
 
 // ── COUNTERS ──────────────────────────────────────────────────────
-function updateCounters(){
-  const elapsed=(Date.now()-PAGE_LOAD)/1000;
-  document.getElementById('hb-counter').textContent=Math.floor(elapsed*BPS).toLocaleString();
-  const births=Math.floor(elapsed*BIRTHS_PER_SEC);
-  const deaths=Math.floor(elapsed*DEATHS_PER_SEC);
-  const net=births-deaths;
-  document.getElementById('births-counter').textContent=births.toLocaleString();
-  document.getElementById('deaths-counter').textContent=deaths.toLocaleString();
-  document.getElementById('net-counter').textContent='+'+(net>0?net.toLocaleString():'0');
-  const total=births+deaths;
-  const pct=total>0?Math.min(100,Math.round(births/total*100)):70;
-  document.getElementById('net-bar').style.width=pct+'%';
-  const totalBornToday=BIRTHS_TODAY_BASE+births;
-  const totalDiedToday=DEATHS_TODAY_BASE+deaths;
-  document.getElementById('births-today').innerHTML=`~${totalBornToday.toLocaleString()} BORN TODAY<br>~${totalDiedToday.toLocaleString()} DIED TODAY`;
-  // world pop
-  const pop=Math.floor(8200000000+elapsed*2.5);
-  document.getElementById('world-pop').textContent=pop.toLocaleString();
-  updateDayNight(pop);
-  updateTimeAlive();
-}
-setInterval(updateCounters,50);
+(function startCounters(){
+  var t0 = Date.now();
+  var midnight = new Date(); midnight.setHours(0,0,0,0);
+  var secondsToday = (t0 - midnight.getTime()) / 1000;
+
+  function run(){
+    var elapsed = (Date.now() - t0) / 1000;
+
+    // heartbeat
+    var hb = Math.floor(elapsed * 9600000000);
+    document.getElementById('hb-counter').textContent = hb.toLocaleString();
+
+    // births
+    var births = Math.floor(elapsed * 4.3);
+    document.getElementById('births-counter').textContent = births.toLocaleString();
+
+    // deaths
+    var deaths = Math.floor(elapsed * 1.8);
+    document.getElementById('deaths-counter').textContent = deaths.toLocaleString();
+
+    // net
+    var net = births - deaths;
+    document.getElementById('net-counter').textContent = '+' + net.toLocaleString();
+
+    // net bar
+    var pct = births + deaths > 0 ? Math.round(births / (births + deaths) * 100) : 70;
+    document.getElementById('net-bar').style.width = Math.min(100, pct) + '%';
+
+    // today totals
+    var bToday = Math.floor((secondsToday + elapsed) * 4.3);
+    var dToday = Math.floor((secondsToday + elapsed) * 1.8);
+    document.getElementById('births-today').innerHTML = '~' + bToday.toLocaleString() + ' BORN TODAY<br>~' + dToday.toLocaleString() + ' DIED TODAY';
+
+    // world pop
+    var pop = Math.floor(8200000000 + elapsed * 2.5);
+    document.getElementById('world-pop').textContent = pop.toLocaleString();
+
+    // day/night
+    var utcH = new Date().getUTCHours();
+    var dayFrac = 0.5 + 0.12 * Math.sin((utcH - 6) * Math.PI / 12);
+    var dayPct = Math.round(dayFrac * 100);
+    document.getElementById('day-pct').textContent = dayPct + '%';
+    document.getElementById('night-pct').textContent = (100 - dayPct) + '%';
+    document.getElementById('day-bar').style.width = dayPct + '%';
+    document.getElementById('night-bar').style.width = (100 - dayPct) + '%';
+    document.getElementById('day-humans').textContent = (pop * dayFrac / 1e9).toFixed(2) + 'B IN DAYLIGHT';
+    document.getElementById('night-humans').textContent = (pop * (1 - dayFrac) / 1e9).toFixed(2) + 'B IN DARKNESS';
+
+    // time alive
+    updateTimeAlive();
+  }
+
+  setInterval(run, 50);
+  run();
+})();
 
 // ── ISS ───────────────────────────────────────────────────────────
 async function loadISS(){
@@ -742,4 +775,5 @@ loadAll();
 </script>
 </body>
 </html>
+
 
