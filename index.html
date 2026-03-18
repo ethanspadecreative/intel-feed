@@ -355,6 +355,15 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div class="bottom-pad"></div>
 
 <script>
+// ── CORE CONSTANTS — must be first ───────────────────────────────
+const PAGE_LOAD = Date.now();
+const BPS = 8000000000 * 72 / 60;
+const BIRTHS_PER_SEC = 4.3;
+const DEATHS_PER_SEC = 1.8;
+const _midnight = new Date(); _midnight.setHours(0,0,0,0);
+const BIRTHS_TODAY_BASE = Math.floor((Date.now() - _midnight.getTime()) / 1000 * BIRTHS_PER_SEC);
+const DEATHS_TODAY_BASE = Math.floor((Date.now() - _midnight.getTime()) / 1000 * DEATHS_PER_SEC);
+
 // ── CLOCK ─────────────────────────────────────────────────────────
 function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
 function initHeader(){
@@ -376,28 +385,7 @@ function updateDayNight(pop){
 }
 
 // ── WORLD POPULATION + DAY/NIGHT ────────────────────────────────
-const WORLD_POP_BASE = 8200000000;
-const WORLD_POP_NET_PER_SEC = 2.5; // net births minus deaths
-
-function updateWorldPop(elapsed) {
-  const pop = Math.floor(WORLD_POP_BASE + elapsed * WORLD_POP_NET_PER_SEC);
-  document.getElementById('world-pop').textContent = pop.toLocaleString();
-  // Day/night split — calculated from UTC hour
-  // ~55% of world population lives in longitudes where it's currently daytime
-  const utcH = new Date().getUTCHours();
-  // Rough sinusoidal approximation of daylit population fraction
-  const dayFrac = 0.5 + 0.12 * Math.sin((utcH - 6) * Math.PI / 12);
-  const dayPct = Math.round(dayFrac * 100);
-  const nightPct = 100 - dayPct;
-  const dayHumans = Math.floor(pop * dayFrac);
-  const nightHumans = pop - dayHumans;
-  document.getElementById('day-pct').textContent = dayPct + '%';
-  document.getElementById('night-pct').textContent = nightPct + '%';
-  document.getElementById('day-bar').style.width = dayPct + '%';
-  document.getElementById('night-bar').style.width = nightPct + '%';
-  document.getElementById('day-humans').textContent = (dayHumans / 1e9).toFixed(2) + 'B IN DAYLIGHT';
-  document.getElementById('night-humans').textContent = (nightHumans / 1e9).toFixed(2) + 'B IN DARKNESS';
-}
+// (handled inside updateCounters below)
 
 // ── TIME ALIVE ────────────────────────────────────────────────────
 let dobMs = null;
@@ -496,14 +484,7 @@ function nextFact() { factIdx++; renderFact(); }
 setInterval(() => { factIdx++; renderFact(); }, 60000);
 
 
-const PAGE_LOAD=Date.now();
-const BPS=8000000000*72/60;
-const BIRTHS_PER_SEC=4.3;
-const DEATHS_PER_SEC=1.8;
-const NET_PER_SEC=BIRTHS_PER_SEC-DEATHS_PER_SEC; // ~2.5
-const BIRTHS_TODAY_BASE=Math.floor((Date.now()-new Date().setHours(0,0,0,0))/1000*BIRTHS_PER_SEC);
-const DEATHS_TODAY_BASE=Math.floor((Date.now()-new Date().setHours(0,0,0,0))/1000*DEATHS_PER_SEC);
-
+// ── COUNTERS ──────────────────────────────────────────────────────
 function updateCounters(){
   const elapsed=(Date.now()-PAGE_LOAD)/1000;
   document.getElementById('hb-counter').textContent=Math.floor(elapsed*BPS).toLocaleString();
@@ -761,3 +742,4 @@ loadAll();
 </script>
 </body>
 </html>
+
