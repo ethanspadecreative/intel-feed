@@ -352,10 +352,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div id="volcano-content" class="ld">SCANNING_MAGMA_CHAMBERS...</div>
   </div>
 
-  <!-- YOUR VITALS -->
-  <div class="card grid-full" style="--card-accent:var(--cyan)">
-    <div class="card-label">Your Vitals // Local Node</div>
-    <div class="vitals-grid" id="vitals-grid"></div>
   </div>
 
 </div>
@@ -712,33 +708,6 @@ function loadVolcanoes(){
   document.getElementById('volcano-content').innerHTML=html;
 }
 
-// ── YOUR VITALS ──────────────────────────────────────────────────
-function loadVitals(){
-  // Pull from localStorage shared with morning app
-  let sleep=null,mirrorCount=0,todos=[];
-  try{
-    const sd=JSON.parse(localStorage.getItem('em_sleep')||'{}');
-    if(sd.history&&sd.history.length){
-      const last=sd.history[sd.history.length-1];
-      if(last.duration)sleep=last.duration.toFixed(1);
-    }
-  }catch(e){}
-  try{
-    const md=JSON.parse(localStorage.getItem('em_mirror')||'{}');
-    mirrorCount=md.answers?md.answers.length:0;
-  }catch(e){}
-  try{
-    todos=JSON.parse(localStorage.getItem('em_todos')||'[]');
-  }catch(e){}
-  const tasksLeft=todos.filter(t=>!t.done).length;
-  const h=new Date().getHours();
-  const tod=h<6?'DEEP_NIGHT':h<12?'MORNING':h<17?'AFTERNOON':h<21?'EVENING':'NIGHT';
-  document.getElementById('vitals-grid').innerHTML=`
-    <div class="vital"><div class="vital-val">${sleep?sleep+'H':'N/A'}</div><div class="vital-lbl">Last Sleep</div></div>
-    <div class="vital"><div class="vital-val">${mirrorCount}</div><div class="vital-lbl">Mirror Days</div></div>
-    <div class="vital"><div class="vital-val">${tasksLeft}</div><div class="vital-lbl">Tasks Open</div></div>
-    <div class="vital" style="grid-column:1/-1"><div class="vital-val" style="font-size:13px;letter-spacing:.1em">${tod}</div><div class="vital-lbl">Current Phase</div></div>`;
-}
 
 // ── LOAD ALL ─────────────────────────────────────────────────────
 function loadAll(){
@@ -750,8 +719,7 @@ function loadAll(){
   loadLightning();
   loadAsteroids();
   loadVolcanoes();
-  loadVitals();
-}
+  }
 
 // ── INIT ─────────────────────────────────────────────────────────
 initHeader();tick();setInterval(tick,10000);
@@ -763,6 +731,7 @@ loadAll();
 </script>
 </body>
 </html>
+
 
 
 
