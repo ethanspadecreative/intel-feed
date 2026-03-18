@@ -362,6 +362,19 @@ function initHeader(){
   document.getElementById('dateline').textContent=`${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()} // NAMPA_IDAHO_US`;
 }
 
+function updateDayNight(pop){
+  const utcH=new Date().getUTCHours();
+  const dayFrac=0.5+0.12*Math.sin((utcH-6)*Math.PI/12);
+  const dayPct=Math.round(dayFrac*100);
+  const nightPct=100-dayPct;
+  document.getElementById('day-pct').textContent=dayPct+'%';
+  document.getElementById('night-pct').textContent=nightPct+'%';
+  document.getElementById('day-bar').style.width=dayPct+'%';
+  document.getElementById('night-bar').style.width=nightPct+'%';
+  document.getElementById('day-humans').textContent=(pop*dayFrac/1e9).toFixed(2)+'B IN DAYLIGHT';
+  document.getElementById('night-humans').textContent=(pop*(1-dayFrac)/1e9).toFixed(2)+'B IN DARKNESS';
+}
+
 // ── WORLD POPULATION + DAY/NIGHT ────────────────────────────────
 const WORLD_POP_BASE = 8200000000;
 const WORLD_POP_NET_PER_SEC = 2.5; // net births minus deaths
@@ -499,13 +512,17 @@ function updateCounters(){
   const net=births-deaths;
   document.getElementById('births-counter').textContent=births.toLocaleString();
   document.getElementById('deaths-counter').textContent=deaths.toLocaleString();
-  document.getElementById('net-counter').textContent='+'+net.toLocaleString();
-  const pct=Math.min(100,Math.round(births/(births+deaths)*100));
+  document.getElementById('net-counter').textContent='+'+(net>0?net.toLocaleString():'0');
+  const total=births+deaths;
+  const pct=total>0?Math.min(100,Math.round(births/total*100)):70;
   document.getElementById('net-bar').style.width=pct+'%';
   const totalBornToday=BIRTHS_TODAY_BASE+births;
   const totalDiedToday=DEATHS_TODAY_BASE+deaths;
   document.getElementById('births-today').innerHTML=`~${totalBornToday.toLocaleString()} BORN TODAY<br>~${totalDiedToday.toLocaleString()} DIED TODAY`;
-  updateWorldPop(elapsed);
+  // world pop
+  const pop=Math.floor(8200000000+elapsed*2.5);
+  document.getElementById('world-pop').textContent=pop.toLocaleString();
+  updateDayNight(pop);
   updateTimeAlive();
 }
 setInterval(updateCounters,50);
@@ -744,5 +761,3 @@ loadAll();
 </script>
 </body>
 </html>
-
-
